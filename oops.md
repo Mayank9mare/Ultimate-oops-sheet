@@ -287,6 +287,12 @@ int main() {
 - The class which is deriving the property of another class is called as derived / child class 
 - The class which is derived is known as parent / base class
 
+<h4 class="color_heading">Not all functions are Inherited</h4>
+
+- constructor and destructor don't inherit
+- operator= function don't inherit
+- friend functions don't inherit
+
 <h3 class="color_heading">Types of Inheritance</h3>
 
 - Single Inheritance 
@@ -821,6 +827,41 @@ int main() {
 
 - a way of initializing variables in the class
 
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class base {
+    int x,y,z;
+
+    public:
+        // base (int a, int b, int c): x(a),y(b),z(c) { // outputs 1 2 3
+        //     cout << "constructor called" << endl;
+        // }
+
+        // base (int a, int b, int c): x(a),y(b+x),z(c+y) { // outputs 1 3 6
+        //     cout << "constructor called" << endl;
+        // }
+
+        base (int a, int b, int c): x(a), z(c+x), y(b+z) { // y becomes garbage because the order of declaring the variables is x, y, z 
+            cout << "constructor called" << endl;
+        }
+
+        void print() {
+            cout << x << " " << y << " " << z << endl;
+        }
+};
+
+
+int main () {
+
+    base * bs1 = new base(1,2,3);
+    bs1->print();
+
+    return 0;
+}
+```
 
 
 <h3 class="color_heading">Friend Function</h3>
@@ -881,10 +922,150 @@ int main () {
 }
 ```
 
-<h3 class="color_heading">Name Mangling</h3>
 <h3 class="color_heading">Virtual function in multilevel inheritance</h3>
+
+- for multilevel inheritance just declare the base class functions as virtual (straight forward)
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class base1 {
+    public:
+        virtual void speak() {
+            cout << "base 1 speaking" << endl;
+        }
+};
+
+class base2 : public base1 {
+    public: 
+        virtual void speak() {
+            cout << "base 2 speaking" << endl;
+        }
+};
+
+class derived: public base2 {
+    public: 
+        void speak() {
+            cout << "derived speaking" << endl;
+        }
+};
+
+
+int main () {
+    // base class pointer pointing to derived class pointer
+    base1 * bs1 = new base1();
+    base2 * bs2 = new base2();
+    derived * dr = new derived();
+
+    bs1 = bs2;
+    bs1->speak(); // prints base 2 speaks
+
+    bs1 = dr;
+    bs1->speak(); // prints derived speaking
+    return 0;
+}
+```
+
 <h3 class="color_heading">Accessing private functions using virtual keyword</h3>
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class base1 {
+    public:
+        virtual void show_id() {};
+        
+};
+
+class base2 : public base1 {
+    private:
+        int id; // very secret information
+        void show_id() {
+            cout << "the id is : " << id << endl;
+        }
+};
+
+int main () {
+    base1 * bs1 = new base1();
+    base2 * bs2 = new base2();
+
+    bs1 = bs2;
+    bs1->show_id(); // runs the show id function
+    return 0;
+}
+```
+
 <h3 class="color_heading">Can virtual functions be friend functions</h3>
+
+- YES, The virtual functions can also become friend functions
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+// forward declaration
+
+class base1;
+
+class base2 {
+    public:
+        virtual base1 * add_two_base1(base1 *, base1 *);
+};
+
+class derived: public base2 {
+    public:
+        base1 * add_two_base1(base1 *, base1 *);
+};
+
+class base1 {
+    friend base1 * base2 :: add_two_base1(base1 *, base1 *);
+    friend base1 * derived :: add_two_base1(base1 *, base1 *);
+
+    int x, y;
+    public:
+        base1 (int a, int b): x(a), y(b) {}        
+        void show() {
+            cout << x << " " << y << endl;
+        }
+};
+
+
+
+base1 * base2 :: add_two_base1(base1 * bs11, base1 * bs12) {
+    base1 * bs1 =  new base1(bs11->x + bs12->x, bs11->y + bs12->y);
+    return bs1;
+}
+
+
+base1 * derived :: add_two_base1(base1 * bs11, base1 *bs12) {
+    base1 * bs1 =  new base1(bs11->x + bs12->x + 2, bs11->y + bs12->y + 2);
+    return bs1;
+}
+
+int main () {
+    base1 * bs1 = new base1(2,3);
+    base1 * bs2 = new base1(4,2);
+    base2 * bss2 = new base2();
+    base1 * bs3 = bss2->add_two_base1(bs1,bs2);
+    bs3->show(); // 6 5
+
+    base2 * bs_ptr = new base2();
+    derived * der_ptr = new derived();
+    bs_ptr = der_ptr;
+    base1 * bs4 = bs_ptr->add_two_base1(bs1,bs2);
+    bs4->show(); // calls the add_two_base1 function of derived class
+    return 0;
+}
+```
+
+<h3 class="color_heading">Name Mangling</h3>
+
+
 <h3 class="color_heading">Early and Late binding</h3>
 
 <h2 id="kim">Keep in mind</h2>
