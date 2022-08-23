@@ -339,6 +339,19 @@ int main() {
 
 - Multiple Inheritance
 
+- In multiple inheritance the order of execution of constuctor is the order of declaration of the class
+- for example if the inheritance is as follows (A $\to$ C) and (B $\to$ C) then the order of constructor calling is A then B
+
+```
+class A;
+class B;
+class C: public A, public B {
+    C(): A(), B() {} // order of execution of constructor is A then B
+    C(): B(), A() {} // order of execution remains the same as the declaration is (public A, public B) so first A will be called and then B, the order does not matter
+}
+```
+
+
 <div class="image_color">
     <img src="diagrams/multipleinh.svg" width=200 />
 </div>
@@ -406,6 +419,9 @@ int main() {
 
 
 - Multilevel Inheritance
+
+- In multilevel inheritance the constructors are called in the order of the inheritance
+- for example inheritance is like this (A $\to$ B $\to$ C) then the order of calling constructor is (A $\to$ B $\to$ C)
 
 <div class="image_color">
     <img src="diagrams/multilevelinh.svg" width=100 />
@@ -485,9 +501,71 @@ can be easily implemented using above concepts
 
 - Hybrid Inheritance
 
+- the virtual base class always has higher preference in calling the constructors 
+
+```
+class A;
+class B;
+class C: public A, virtual public B {
+    C(): A(), B() {} // order of execution of constructor is B then A
+    C(): B(), A() {} // order of execution remains the same as B is declared virtual base class which is always preferred
+}
+```
+
+- If there are more virtual base classes then their order would decide the constructor calling
+
 <div class="image_color">
     <img src="diagrams/hybridinh.svg" width=200 />
 </div>
+
+```cpp
+#include <bits/stdc++.h>
+
+using namespace std;
+
+class base1 {
+    public:
+        void speak() {
+            cout << "base 1 is speaking" << endl;
+        }
+};
+
+class base2: virtual public base1 {
+    public:
+        void tell() {
+            cout << "base2 is telling" << endl;
+        }
+
+        void speak() { // now speak will call this speak function
+            cout << "base2 is speaking" << endl;
+        }
+};
+
+class base3: virtual public base1 {
+    public:
+        void tell() {
+            cout << "base3 is telling" << endl;
+        }
+};
+
+class base4:public base2, public base3 {
+    public:
+        void chill() {
+            cout << "base4 is chilling" << endl;
+        }
+        void tell () {
+            base2:: tell();
+        }
+};
+
+
+int main () {
+    base4 * bs4 = new base4();
+    bs4->speak();
+    return 0;
+}
+```
+
 
 <h3 class="color_heading">Inheritance Access specifier Table</h3>
 
@@ -518,6 +596,13 @@ can be easily implemented using above concepts
 <h3 class="color_heading">Function overloading</h3>
 
 - function with same name but different types and number of arguments
+- functions are overloaded not on the basis of their return type but on the basis of their number of arguments and type of arguments
+
+<h4 class="color_heading">Remember</h4>
+
+- The key to function overloading is a function’s argument list
+- This is also known as the function signature/ extended name.
+- It is the signature, not the function type that enables function overloading.
 
 ```cpp
 #include <bits/stdc++.h>
@@ -1065,15 +1150,35 @@ int main () {
 
 <h3 class="color_heading">Name Mangling</h3>
 
+- c++ allows function overloading but linker does not (so how the overloading is performed in c++?)
+- the g++ compiler uses name mangling to assign a name to each function to overload it
+- example mangling pattern
+    - _ZNOP
+    - Z is just Z (does not represent anything)
+    - N is number of characters in original function name
+    - O is the original function name
+    - P is parameter encoded (int, char etc)
+    - void myfun(int a, string c)
+        - name = _Z5myfunis
 
 <h3 class="color_heading">Early and Late binding</h3>
+
+- Binding basically refers to the conversion of functions or variables to addresses
+- Early binding is also called as compile time polymorphism where at the compilation time the compiler does the binding 
+- Dynamic binding is also called as runtime polymorphism where at the runtime the compiler decides and does the binding (can be achieved using virtual functions)
+- By default, C++ follows early binding 
 
 <h2 id="kim">Keep in mind</h2>
 
 - static functions cannot be declared virtual as the static function tied to class not object to class and cpp doesn't support pointer to class;
 - virtual function can be a friend function for another class
+- The function is overloaded based on the argument list not on the return type
+- runtime polymorphism is also known as dynamic polymorphism or late binding
+- ambiguity resolution can be done using (class_name:: fun_name) or by virtual base class
 
 ---
+
+<div class="signature"><p>योगः कर्मसु कौशलम्</p></div>
 
 <style> 
 
@@ -1100,6 +1205,12 @@ h5 {
 }
 
 .image_color {
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.signature {
     display:flex;
     align-items:center;
     justify-content:center;
